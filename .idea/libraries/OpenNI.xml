@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="OpenNI">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/OpenNI/OpenNI-Bin-Dev-Linux-x64-v1.5.7.10.tar.zip!/" />
+      <root url="jar://$PROJECT_DIR$/OpenNI/OpenNI-Bin-Dev-MacOSX-v1.5.7.10.tar.zip!/" />
+      <root url="jar://$PROJECT_DIR$/OpenNI/OpenNI-Win32-1.5.7.10-Dev.zip!/" />
+      <root url="jar://$PROJECT_DIR$/OpenNI/OpenNI-Win64-1.5.7.10-Dev.zip!/" />
+      <root url="jar://$PROJECT_DIR$/OpenNI/OpenNI-Bin-Dev-Linux-x86-v1.5.7.10.tar.zip!/" />
+      <root url="jar://$PROJECT_DIR$/OpenNI/OpenNI-Bin-Dev-Linux-Arm-v1.5.7.10.tar.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

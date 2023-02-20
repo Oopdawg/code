@@ -2,21 +2,14 @@ package org.javaopencvbook;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -31,27 +24,36 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.javaopencvbook.utils.ImageProcessor;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
 
 public class GUI {
-	public static final String DISPARITY_STRING = "Disparity Map";
-	public static final String RGB_STRING = "RGB Image";
+	public static final String BRIGHT_IMAGE = "Bright Image";
+	public static final String ORIGINAL_IMAGE = "Original Image";
 	public static final String BACKGROUND_STRING = "Background";
-	public static final String DISPARITY_THRESHOLD_STRING = "Disparity Thresholded";
+	public static final String YELLOW_IMAGE = "Yellow Image";
 	public static final String COMBINED_STRING = "Combined";
 	public static final String RGB_MASK_STRING = "Masked RGB";
 	private JLabel imageView;
 	private String windowName;
 	private String outputMode = COMBINED_STRING;
 	private Mat image, originalImage;
-	private int level = 0;
-	
-	public int getLevel() {
-		return level;
+
+	public class Level {
+		public int value;
+		Level(){
+			value = 0;
+		}
+
+		Level(int initialValue) {
+			value = initialValue;
+		}
 	}
+	// Levels in BGR order
+	Level[] minLevels = new Level[3];
+	Level[] maxLevels = new Level[3];
+
+	int minInitValues[] = {0, 120, 120};
+	int maxInitValues[] = {120, 255, 255};
 
 	private final ImageProcessor imageProcessor = new ImageProcessor();
 	
@@ -61,6 +63,11 @@ public class GUI {
 		this.windowName = windowName;
 		this.image = newImage;
 		this.originalImage = newImage.clone();
+
+		for(int i=0;i<=2;i++) {
+			minLevels[i] = new Level(minInitValues[i]);
+			maxLevels[i] = new Level(maxInitValues[i]);
+		}
 	}
 
 	public void init() {
@@ -85,13 +92,49 @@ public class GUI {
 	}
 
 
+	private void setupSlider(JFrame frame, String colorName, Level level) {
+		JLabel sliderLabel = new JLabel(colorName+ " filter", JLabel.CENTER);
+		sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+		int minimum = 0;
+		int maximum = 255;
+
+		JSlider levelSlider = new JSlider(JSlider.HORIZONTAL,
+				minimum, maximum, level.value);
+
+		levelSlider.setMajorTickSpacing(15);
+		levelSlider.setMinorTickSpacing(1);
+		levelSlider.setPaintTicks(true);
+		levelSlider.setPaintLabels(true);
+		levelSlider.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				JSlider source = (JSlider)e.getSource();
+				level.value = (int)source.getValue();
+				//Mat output = imageProcessor.blur(image, level);
+				//updateView(output);
+			}
+		});
+
+		frame.add(sliderLabel);
+		frame.add(levelSlider);
+	}
 
 
 	private JFrame createJFrame(String windowName) {
 		JFrame frame = new JFrame(windowName);
-		frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS));
 
-		setupSlider(frame);
+		BoxLayout bl = new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS);
+		frame.setLayout(bl);
+
+		// BGR order
+		setupSlider(frame, "Min Blue", minLevels[0]);
+		setupSlider(frame, "Max Blue", maxLevels[0]);
+		setupSlider(frame, "Min Green", minLevels[1]);
+		setupSlider(frame, "Max Green", maxLevels[1]);
+		setupSlider(frame, "Min Red", minLevels[2]);
+		setupSlider(frame, "Max Red", maxLevels[2]);
+
 		setupRadio(frame);
 		setupImage(frame);
 
@@ -100,19 +143,19 @@ public class GUI {
 	}
 
 	private void setupRadio(JFrame frame) {
-		JRadioButton disparityMapButton = new JRadioButton(DISPARITY_STRING);
+		JRadioButton disparityMapButton = new JRadioButton(BRIGHT_IMAGE);
 		disparityMapButton.setMnemonic(KeyEvent.VK_D);
-		disparityMapButton.setActionCommand(DISPARITY_STRING);
+		disparityMapButton.setActionCommand(BRIGHT_IMAGE);
 		disparityMapButton.setSelected(false);
 		
-		JRadioButton disparityThresholdButton = new JRadioButton(DISPARITY_THRESHOLD_STRING);
+		JRadioButton disparityThresholdButton = new JRadioButton(YELLOW_IMAGE);
 		disparityThresholdButton.setMnemonic(KeyEvent.VK_T);
-		disparityThresholdButton.setActionCommand(DISPARITY_THRESHOLD_STRING);
+		disparityThresholdButton.setActionCommand(YELLOW_IMAGE);
 		disparityThresholdButton.setSelected(false);
 
-		JRadioButton rgbButton = new JRadioButton(RGB_STRING);
+		JRadioButton rgbButton = new JRadioButton(ORIGINAL_IMAGE);
 		rgbButton.setMnemonic(KeyEvent.VK_R);
-		rgbButton.setActionCommand(RGB_STRING);
+		rgbButton.setActionCommand(ORIGINAL_IMAGE);
 		rgbButton.setSelected(false);
 		
 		
@@ -189,34 +232,6 @@ public class GUI {
 	}
 
 
-	private void setupSlider(JFrame frame) {
-		JLabel sliderLabel = new JLabel("Depth filter", JLabel.CENTER);
-		sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		
-		int minimum = 0;
-		int maximum = 100;
-		int initial =0;
-
-		JSlider levelSlider = new JSlider(JSlider.HORIZONTAL,
-				minimum, maximum, initial);
-
-		levelSlider.setMajorTickSpacing(10);
-		levelSlider.setMinorTickSpacing(1);
-		levelSlider.setPaintTicks(true);
-		levelSlider.setPaintLabels(true);
-		levelSlider.addChangeListener(new ChangeListener() {
-
-			public void stateChanged(ChangeEvent e) {
-				JSlider source = (JSlider)e.getSource();
-				level = (int)source.getValue();
-				//Mat output = imageProcessor.blur(image, level);
-				//updateView(output);			
-			}
-		});
-
-		frame.add(sliderLabel);
-		frame.add(levelSlider);
-	}
 
 	private void setSystemLookAndFeel() {
 		try {
