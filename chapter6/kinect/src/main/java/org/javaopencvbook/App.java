@@ -7,6 +7,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.*;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.photo.Photo;
 
 public class App 
 {
@@ -23,6 +24,7 @@ public class App
 
 	Mat colorImage = new Mat();
 	Mat brightImage = new Mat();
+	Mat brightHSV = new Mat();
 	Mat yellowColorImage = new Mat();
 	Mat mask = new Mat();
 	Mat maskedImage = new Mat();
@@ -30,6 +32,9 @@ public class App
 	Mat background = Imgcodecs.imread("/Users/denis/Documents/GitHub/code/chapter6/kinect/src/main/resources/images/background.jpg");
 	Mat resizedBackground = new Mat();
 	Mat workingBackground = new Mat();
+	Mat dnImage = new Mat();
+
+
 
 
 	public static void main(String[] args) throws Exception {
@@ -44,37 +49,46 @@ public class App
 
 		VideoCapture capture = new VideoCapture(CV_CAP_OPENNI);
 		capture.grab();
-		capture.retrieve( colorImage,  CV_CAP_OPENNI_DISPARITY_MAP);
-		colorImage.convertTo(yellowColorImage,CvType.CV_8UC1, 50.00f );
+		capture.retrieve(colorImage,  CV_CAP_OPENNI_DISPARITY_MAP);
+		//colorImage.convertTo(yellowColorImage,CvType.CV_8UC1, 50.00f );
 
 
 
-		if(yellowColorImage.rows()>0){
-			Imgproc.resize(background, resizedBackground, yellowColorImage.size());
-			
-			GUI gui = new GUI("OpenCV Kinect Depth Chroma Key", yellowColorImage);
+		if(colorImage.rows()>0){
+			Imgproc.resize(background, resizedBackground, colorImage.size());
+
+			GUI gui = new GUI("OpenCV Kinect Depth Chroma Key", colorImage);
 			gui.init();
 			while(true){
 				capture.grab();
 
 				capture.retrieve(colorImage, CV_CAP_OPENNI_BGR_IMAGE);
-				colorImage.convertTo(brightImage,CvType.CV_8UC1, 1.7f ); // increase brightness
-				Imgproc.cvtColor(brightImage, yellowColorImage, Imgproc.COLOR_BGR2GRAY);
+				//colorImage.convertTo(brightImage,CvType.CV_8UC1, 1.8f ); // increase brightness
+
+				Imgproc.cvtColor(colorImage, brightHSV, Imgproc.COLOR_BGR2HSV);
+
 
 				// in BGR order
 				Scalar lower_color_bounds = new Scalar(gui.minLevels[0].value, gui.minLevels[1].value, gui.minLevels[2].value);
 				Scalar upper_color_bounds = new Scalar(gui.maxLevels[0].value, gui.maxLevels[1].value, gui.maxLevels[2].value);
 
-				Core.inRange(brightImage,lower_color_bounds,upper_color_bounds, mask );
+				Core.inRange(brightHSV,lower_color_bounds,upper_color_bounds, mask );
 
 				maskedImage.setTo(new Scalar(0,0,0));
 				colorImage.copyTo(maskedImage, mask);
 
+				//Imgproc.cvtColor(maskedImage, grayImage, Imgproc.COLOR_BGR2GRAY);
+				//Imgproc.threshold(grayImage, dnMask, 70, 255, Imgproc.THRESH_BINARY_INV);
+				//Photo.inpaint(yellowColorImage, dnMask, dnImage, 20, Photo.INPAINT_TELEA);
+
+
 				workingBackground.setTo(new Scalar(0,0,0));
-				maskedImage.copyTo(workingBackground,maskedImage);
-				
+				maskedImage.copyTo(workingBackground,mask);
+
+				//Photo.fastNlMeansDenoisingColored(workingBackground, dnImage, 3, 3, 7, 21);
+
 				renderOutputAccordingToMode(gui);
-				
+
 			}
 		}
 		else{
@@ -84,7 +98,7 @@ public class App
 
 	}
 
-	
+
 	private void renderOutputAccordingToMode(GUI gui) {
 		if(GUI.RGB_MASK_STRING.equals(gui.getOutputMode())){
 			gui.updateView(maskedImage);
@@ -92,8 +106,8 @@ public class App
 		else if( GUI.BRIGHT_IMAGE.equals(gui.getOutputMode())){
 			gui.updateView(brightImage);
 		}
-		else if(GUI.YELLOW_IMAGE.equals(gui.getOutputMode())){
-			gui.updateView(yellowColorImage);
+		else if(GUI.DENOISE_IMAGE.equals(gui.getOutputMode())){
+			gui.updateView(dnImage);
 		}
 		else if(GUI.ORIGINAL_IMAGE.equals(gui.getOutputMode())){
 			gui.updateView(colorImage);

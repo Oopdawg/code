@@ -30,7 +30,7 @@ public class GUI {
 	public static final String BRIGHT_IMAGE = "Bright Image";
 	public static final String ORIGINAL_IMAGE = "Original Image";
 	public static final String BACKGROUND_STRING = "Background";
-	public static final String YELLOW_IMAGE = "Yellow Image";
+	public static final String DENOISE_IMAGE = "Denoise Image";
 	public static final String COMBINED_STRING = "Combined";
 	public static final String RGB_MASK_STRING = "Masked RGB";
 	private JLabel imageView;
@@ -52,8 +52,11 @@ public class GUI {
 	Level[] minLevels = new Level[3];
 	Level[] maxLevels = new Level[3];
 
-	int minInitValues[] = {0, 120, 120};
-	int maxInitValues[] = {120, 255, 255};
+	//int minInitValues[] = {18, 130, 50};
+	//int maxInitValues[] = {32, 255, 255};
+
+	int minInitValues[] = {15, 155, 100};
+	int maxInitValues[] = {38, 255, 255};
 
 	private final ImageProcessor imageProcessor = new ImageProcessor();
 	
@@ -148,9 +151,9 @@ public class GUI {
 		disparityMapButton.setActionCommand(BRIGHT_IMAGE);
 		disparityMapButton.setSelected(false);
 		
-		JRadioButton disparityThresholdButton = new JRadioButton(YELLOW_IMAGE);
+		JRadioButton disparityThresholdButton = new JRadioButton(DENOISE_IMAGE);
 		disparityThresholdButton.setMnemonic(KeyEvent.VK_T);
-		disparityThresholdButton.setActionCommand(YELLOW_IMAGE);
+		disparityThresholdButton.setActionCommand(DENOISE_IMAGE);
 		disparityThresholdButton.setSelected(false);
 
 		JRadioButton rgbButton = new JRadioButton(ORIGINAL_IMAGE);
