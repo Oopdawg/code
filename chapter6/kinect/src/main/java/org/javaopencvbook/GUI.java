@@ -27,15 +27,15 @@ import org.javaopencvbook.utils.ImageProcessor;
 import org.opencv.core.Mat;
 
 public class GUI {
-	public static final String BRIGHT_IMAGE = "Bright Image";
+	public static final String BLUR_IMAGE = "Blur Image";
 	public static final String ORIGINAL_IMAGE = "Original Image";
-	public static final String BACKGROUND_STRING = "Background";
+	public static final String MASKED_AND_CONTOURS_IMAGE = "maskedAndContoursImage";
 	public static final String DENOISE_IMAGE = "Denoise Image";
 	public static final String COMBINED_STRING = "Combined";
 	public static final String RGB_MASK_STRING = "Masked RGB";
 	private JLabel imageView;
 	private String windowName;
-	private String outputMode = COMBINED_STRING;
+	private String outputMode = MASKED_AND_CONTOURS_IMAGE;
 	private Mat image, originalImage;
 
 	public class Level {
@@ -52,11 +52,8 @@ public class GUI {
 	Level[] minLevels = new Level[3];
 	Level[] maxLevels = new Level[3];
 
-	//int minInitValues[] = {18, 130, 50};
-	//int maxInitValues[] = {32, 255, 255};
-
-	int minInitValues[] = {15, 155, 100};
-	int maxInitValues[] = {38, 255, 255};
+	int minInitValues[] = {17, 120, 110};
+	int maxInitValues[] = {44, 255, 255};
 
 	private final ImageProcessor imageProcessor = new ImageProcessor();
 	
@@ -119,8 +116,9 @@ public class GUI {
 			}
 		});
 
-		frame.add(sliderLabel);
-		frame.add(levelSlider);
+		//DBZ: remove slider display for now to get more space for picture
+		//frame.add(sliderLabel);
+		//frame.add(levelSlider);
 	}
 
 
@@ -146,9 +144,9 @@ public class GUI {
 	}
 
 	private void setupRadio(JFrame frame) {
-		JRadioButton disparityMapButton = new JRadioButton(BRIGHT_IMAGE);
+		JRadioButton disparityMapButton = new JRadioButton(BLUR_IMAGE);
 		disparityMapButton.setMnemonic(KeyEvent.VK_D);
-		disparityMapButton.setActionCommand(BRIGHT_IMAGE);
+		disparityMapButton.setActionCommand(BLUR_IMAGE);
 		disparityMapButton.setSelected(false);
 		
 		JRadioButton disparityThresholdButton = new JRadioButton(DENOISE_IMAGE);
@@ -162,9 +160,9 @@ public class GUI {
 		rgbButton.setSelected(false);
 		
 		
-		JRadioButton backgroundButton = new JRadioButton(BACKGROUND_STRING);
+		JRadioButton backgroundButton = new JRadioButton(MASKED_AND_CONTOURS_IMAGE);
 		backgroundButton.setMnemonic(KeyEvent.VK_B);
-		backgroundButton.setActionCommand(BACKGROUND_STRING);
+		backgroundButton.setActionCommand(MASKED_AND_CONTOURS_IMAGE);
 		backgroundButton.setSelected(false);
 		
 		JRadioButton combinedButton = new JRadioButton(COMBINED_STRING);
