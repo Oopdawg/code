@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -36,15 +37,16 @@ public class GUI {
 	private JLabel imageView;
 	private String windowName;
 	private String outputMode = MASKED_AND_CONTOURS_IMAGE;
-	private Mat image, originalImage;
+	private Mat image;
+	public JLabel label;
 
 	public class Level {
-		public int value;
+		public double value;
 		Level(){
 			value = 0;
 		}
 
-		Level(int initialValue) {
+		Level(double initialValue) {
 			value = initialValue;
 		}
 	}
@@ -52,17 +54,18 @@ public class GUI {
 	Level[] minLevels = new Level[3];
 	Level[] maxLevels = new Level[3];
 
-	int minInitValues[] = {17, 120, 110};
-	int maxInitValues[] = {44, 255, 255};
+	double minInitValues[];
+	double maxInitValues[];
 
 	private final ImageProcessor imageProcessor = new ImageProcessor();
 	
 
-	public GUI(String windowName, Mat newImage) {
+	public GUI(String windowName, Mat newImage, double[] minInitValues, double[] maxInitValues) {
 		super();
 		this.windowName = windowName;
 		this.image = newImage;
-		this.originalImage = newImage.clone();
+		this.minInitValues = minInitValues;
+		this.maxInitValues = maxInitValues;
 
 		for(int i=0;i<=2;i++) {
 			minLevels[i] = new Level(minInitValues[i]);
@@ -100,7 +103,7 @@ public class GUI {
 		int maximum = 255;
 
 		JSlider levelSlider = new JSlider(JSlider.HORIZONTAL,
-				minimum, maximum, level.value);
+				minimum, maximum, (int)level.value);
 
 		levelSlider.setMajorTickSpacing(15);
 		levelSlider.setMinorTickSpacing(1);
@@ -117,8 +120,8 @@ public class GUI {
 		});
 
 		//DBZ: remove slider display for now to get more space for picture
-		//frame.add(sliderLabel);
-		//frame.add(levelSlider);
+		frame.add(sliderLabel);
+		frame.add(levelSlider);
 	}
 
 
@@ -129,14 +132,17 @@ public class GUI {
 		frame.setLayout(bl);
 
 		// BGR order
-		setupSlider(frame, "Min Blue", minLevels[0]);
-		setupSlider(frame, "Max Blue", maxLevels[0]);
-		setupSlider(frame, "Min Green", minLevels[1]);
-		setupSlider(frame, "Max Green", maxLevels[1]);
-		setupSlider(frame, "Min Red", minLevels[2]);
-		setupSlider(frame, "Max Red", maxLevels[2]);
+		//setupSlider(frame, "Min H", minLevels[0]);
+		//setupSlider(frame, "Max H", maxLevels[0]);
+		//setupSlider(frame, "Min S", minLevels[1]);
+		//setupSlider(frame, "Max S", maxLevels[1]);
+		//setupSlider(frame, "Min V", minLevels[2]);
+		//setupSlider(frame, "Max V", maxLevels[2]);
 
 		setupRadio(frame);
+		label = new JLabel();
+		frame.add(label);
+
 		setupImage(frame);
 
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -227,7 +233,7 @@ public class GUI {
 		imageView.setHorizontalAlignment(SwingConstants.CENTER);
 		
 		final JScrollPane imageScrollPane = new JScrollPane(imageView);
-		imageScrollPane.setPreferredSize(new Dimension(680, 510));
+		imageScrollPane.setPreferredSize(new Dimension(image.width(), image.height()));
 		
 		frame.add(imageScrollPane);
 	}
